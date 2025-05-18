@@ -3,7 +3,7 @@
 ARG platform=linux/amd64
 FROM --platform=${platform} ubuntu:24.10
 
-# Set up basics, locales and timezone
+# Install basics, locales and timezone
 RUN apt-get update && apt-get install --yes \
         locales \
         sudo \
@@ -40,6 +40,14 @@ RUN mkdir --parents "$DATA_DIR" \
     && echo "Populated in image build phase" > "$DATA_DIR"/README.md \
     && chown --recursive ${userName}: "$DATA_DIR"
 VOLUME [ "$DATA_DIR" ]
+
+# Set up locale and timezone
+ARG timezone=Europe/Berlin
+ARG locale=en_DK.UTF-8
+RUN locale-gen ${locale} \
+    && update-locale LANG=${locale} \
+    && ln --symbolic --force /usr/share/zoneinfo/${timezone} /etc/localtime \
+    && dpkg-reconfigure --frontend noninteractive tzdata
 
 # Populate user's home directory
 USER ${userName}
