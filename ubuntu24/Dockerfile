@@ -51,7 +51,8 @@ RUN locale-gen ${locale} \
 
 # Populate user's home directory
 USER ${userName}
-CMD [ "/bin/zsh" ]
+ENTRYPOINT [ "/usr/bin/zsh", "--interactive", "-c" ]
+CMD [ "zsh" ]
 WORKDIR /home/${userName}
 
 ARG name=ubuntu24
