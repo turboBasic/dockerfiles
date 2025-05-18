@@ -1,9 +1,10 @@
 typeset -U FPATH fpath
-typeset -U PATH path=( $path ~/.local/bin)
+typeset -U PATH path=( $path ~/.local/bin )
 typeset -U MANPATH manpath
 typeset -U CDPATH cdpath
 
-export LANG=en_GB.UTF-8
+export LANG=en_DK.UTF-8
+export LC_NUMERIC=en_GB.UTF-8
 export EDITOR='nvim'
 export LESS="\
 --buffers=128 \

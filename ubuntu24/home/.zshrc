@@ -34,7 +34,7 @@ setopt  \
 # Prompt
 autoload -Uz promptinit
 promptinit
-PROMPT='%n@%m %1~ %# '
+prompt adam1
 
 # Enable completion system
 autoload -Uz compinit

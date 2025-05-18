@@ -1,0 +1,77 @@
+#!/usr/bin/zsh
+
+# Usage: compare-locales LC_TIME POSIX de_DE.UTF-8 'date'
+function compare-locales() {
+  local category="$1"
+  local locale1="$2"
+  local locale2="$3"
+  local command="$4"
+
+  #echo "=== Comparing '$command' in $locale1 and $locale2 ==="
+  printf "Output in %-15s %s\n" "$locale1:" "$(export "$category=$locale1"; eval "$command"; echo)"
+  printf "Output in %-15s %s\n" "$locale2:" "$(export "$category=$locale2"; eval "$command"; echo)"
+  echo
+}
+
+# Usage: compare-all-locales LC_TIME 'date'
+function compare-all-locales() {
+    local -r category="$1"
+    local -r command="$2"
+    local locale
+
+    for locale in $(locale -a | grep --fixed-strings UTF-8 | sort); do
+        printf "Output in %-15s %s\n" "$locale:" "$(
+            export "$category=$locale"
+            eval "$command"
+            echo
+        )"
+    done
+}
+
+# Usage: compare-current-locale LC_TIME de_DE.UTF-8 'date'
+function compare-current-locale() {
+  local category="$1"
+  local locale="$2"
+  local command="$3"
+
+  #echo "=== Comparing '$command' in current locale and $locale ==="
+  printf "Output in %-15s %s\n" "current locale:" "$(eval "$command"; echo)"
+  printf "Output in %-15s %s\n" "$locale:" "$(export "$category=$locale"; eval "$command"; echo)"
+  echo
+}
+
+echo "=== Current Locale Environment ==="
+locale
+echo
+
+echo "=== Current Locale variables ==="
+for v in LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES LC_ALL; do
+  echo "$v=${(P)v}"
+done
+echo
+
+echo "=== Demonstrating LC_TIME. current date and time ==="
+compare-current-locale LC_TIME en_US.UTF-8 'date'
+echo
+
+echo "=== Demonstrating LC_NUMERIC. value of 2_000_000_000/3 ==="
+compare-current-locale LC_NUMERIC en_US.UTF-8 $'float num=2_000_000_000/3; printf "%\'.2f" $num'
+echo
+
+echo "=== Demonstrating LC_MONETARY ==="
+locale --keyword-name LC_MONETARY | grep --extended-regexp 'currency_symbol|mon_decimal_point|mon_thousands_sep'
+echo
+
+unsorted=( zebra äpfel apple mass maßß matt )
+echo "=== Demonstrating LC_COLLATE. sorting words: ${unsorted} ==="
+compare-current-locale LC_COLLATE POSIX 'echo ${(o)unsorted}'
+echo
+
+echo "=== Demonstrating LC_MESSAGES. messages from git ==="
+compare-current-locale LC_MESSAGES de_DE.UTF-8 'git -C / remote -v 2>&1'
+echo
+
+lower="abcäöüвабвгдеє"
+echo "=== Demonstrating LC_CTYPE. convert $lower to uppercase ==="
+compare-current-locale LC_CTYPE POSIX 'echo ${(U)lower}'
+echo
