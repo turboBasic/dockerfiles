@@ -1,0 +1,43 @@
+#!/bin/bash
+
+echo "=== Current Locale Environment ==="
+locale
+echo
+
+echo "=== Demonstrating LC_TIME ==="
+printf "date in current     locale: %s\n" "$(date)"
+printf "date in en_US.UTF-8 locale: %s\n" "$(LC_TIME=en_US.UTF-8 date)"
+echo
+
+echo "=== Demonstrating LC_NUMERIC ==="
+printf "number in current     locale: %'.2f\n" $(( 123456789.8765 ))
+LC_NUMERIC=en_US.UTF-8 \
+printf "number in en_US.UTF-8 locale: %s\n" $(( 123456789.8765 ))
+echo
+
+echo "=== Demonstrating LC_MONETARY ==="
+locale --keyword-name LC_MONETARY | grep --extended-regexp 'currency_symbol|mon_decimal_point|mon_thousands_sep'
+echo
+
+echo "=== Demonstrating LC_COLLATE ==="
+echo "Sorting words zebra, äpfel, apple in current locale:"
+echo -e "zebra\näpfel\napple" | sort
+echo "Sorting words zebra, äpfel, apple in POSIX  locale:"
+echo -e "zebra\näpfel\napple" | LC_COLLATE=POSIX sort
+echo
+
+echo "=== Demonstrating LC_MESSAGES ==="
+printf "Error message in current     locale: %s\n" "$(git -C / remote -v 2>&1)"
+printf "Error message in de_DE.UTF-8 locale: %s\n" "$(LC_MESSAGES=de_DE.UTF-8 git -C / remote -v 2>&1)"
+echo
+
+echo "=== Demonstrating LC_CTYPE ==="
+echo "With LC_CTYPE=$LC_CTYPE"
+echo -e "ü\nu\nU" | sort
+echo
+
+echo "=== Demonstrating All Categories ==="
+for cat in LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES; do
+    echo "$cat = ${!cat}"
+done
+echo
