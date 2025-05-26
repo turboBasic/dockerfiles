@@ -1,0 +1,26 @@
+# This script installs chezmoi. It must be sourced from Zsh, not executed directly.
+
+if [[ ! -n "$ZSH_VERSION" || ! "$ZSH_EVAL_CONTEXT" =~ :file$ ]]; then
+  echo This script must be sourced from Zsh, not executed directly.
+  return 1 2>/dev/null || exit 1
+fi
+
+if ! (( $+commands[chezmoi] )); then
+  sh -c "$(curl -fsLS get.chezmoi.io/lb)" || return 1
+  rehash
+fi
+if [[ ! -f ~/.ssh/bw_password ]]; then
+  read "login?Enter your Bitwarden login: "
+  read -s "secret?Enter your Bitwarden password: "
+  echo "$secret" > ~/.ssh/bw_password
+  chmod 600 ~/.ssh/bw_password
+  unset secret
+fi
+if ! bw unlock --check --passwordfile ~/.ssh/bw_password; then
+  if ! bw login --passwordfile ~/.ssh/bw_password --check; then
+    bw login --passwordfile ~/.ssh/bw_password "$login" > /dev/null || { rm -f ~/.ssh/bw_password; return 1; }
+  fi
+  BW_SESSION=$(bw unlock --raw --passwordfile ~/.ssh/bw_password) || { rm -f ~/.ssh/bw_password; return 1; }
+  export BW_SESSION
+fi
+chezmoi init --apply /data
