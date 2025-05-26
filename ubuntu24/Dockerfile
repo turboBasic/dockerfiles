@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install --yes \
         sudo \
         tzdata \
         zsh \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+    `# will not clean up apt cache so that apt-file can be used without updating` \
+    `# && apt-get clean && rm -rf /var/lib/apt/lists/*` \
     && locale-gen de_DE.UTF-8 en_DK.UTF-8 en_GB.UTF-8 en_US.UTF-8 \
     && update-locale LANG=en_DK.UTF-8 \
     && ln --symbolic --force /usr/share/zoneinfo/Europe/Berlin /etc/localtime \
@@ -21,7 +22,7 @@ RUN useradd --create-home --shell=/bin/zsh --groups=sudo ${userName} \
     && echo "${userName} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${userName}
 
 # Install other software
-RUN apt-get update && apt-get install --yes --no-install-recommends \
+RUN apt-get install --yes --no-install-recommends \
         apt-file \
         ca-certificates \
         curl \
@@ -32,7 +33,8 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
         neovim \
         ripgrep \
         tree \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+        unzip \
+        `# last line`
 
 # Create and populate a data volume
 ENV DATA_DIR=/data
@@ -54,6 +56,15 @@ USER ${userName}
 ENTRYPOINT [ "/usr/bin/zsh", "--interactive", "-c" ]
 CMD [ "zsh" ]
 WORKDIR /home/${userName}
+RUN mkdir --mode 700 .ssh
+
+# Install Bitwarden CLI
+ARG bwVersion=2025.4.0
+RUN curl --location --remote-name \
+      "https://github.com/bitwarden/clients/releases/download/cli-v${bwVersion}/bw-linux-${bwVersion}.zip" \
+    && mkdir --parents .local/bin \
+    && unzip "bw-linux-${bwVersion}.zip" -d .local/bin \
+    && rm -f "bw-linux-${bwVersion}.zip"
 
 ARG name=ubuntu24
 COPY --chown=${userName} ${name}/home ./
