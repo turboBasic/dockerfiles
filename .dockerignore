@@ -14,7 +14,7 @@
 **/charts
 **/docker-compose*
 **/bin
-!ubuntu24/home/**
+!ubuntu/home/**
 **/compose*
 **/Dockerfile*
 **/node_modules

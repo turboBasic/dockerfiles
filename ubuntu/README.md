@@ -1,4 +1,4 @@
-# Ubuntu24 for ARM64
+# Ubuntu for ARM64
 
 Dockerfile with some utilities, extra user and external volume mount point
 
