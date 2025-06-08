@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1
 
 # hadolint global ignore=DL3008,DL3009,DL3015,DL3029
-ARG platform=linux/amd64
-FROM --platform=${platform} ubuntu:24.10
+ARG version=24.10
+FROM ubuntu:${version}
 
 # Install basics, locales and timezone
 RUN apt-get update && apt-get install --yes \
@@ -60,6 +60,6 @@ CMD [ "zsh" ]
 WORKDIR /home/${userName}
 RUN mkdir --mode 700 .ssh
 
-ARG name=ubuntu24
-COPY --chown=${userName} ${name}/home ./
+ARG homeDir=ubuntu24/home
+COPY --chown=${userName} ${homeDir} ./
 RUN chmod g-rwx,o-rwx .bash* .zsh*
