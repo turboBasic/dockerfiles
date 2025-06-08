@@ -1,5 +1,6 @@
 # syntax=docker/dockerfile:1
 
+# hadolint global ignore=DL3008,DL3009,DL3015,DL3029
 ARG platform=linux/amd64
 FROM --platform=${platform} ubuntu:24.10
 
@@ -24,6 +25,7 @@ RUN useradd --create-home --shell=/bin/zsh --groups=sudo ${userName} \
 # Install other software
 RUN apt-get install --yes --no-install-recommends \
         apt-file \
+        apt-utils \
         ca-certificates \
         curl \
         file \
@@ -57,14 +59,6 @@ ENTRYPOINT [ "/usr/bin/zsh", "--interactive", "-c" ]
 CMD [ "zsh" ]
 WORKDIR /home/${userName}
 RUN mkdir --mode 700 .ssh
-
-# Install Bitwarden CLI
-ARG bwVersion=2025.4.0
-RUN curl --location --remote-name \
-      "https://github.com/bitwarden/clients/releases/download/cli-v${bwVersion}/bw-linux-${bwVersion}.zip" \
-    && mkdir --parents .local/bin \
-    && unzip "bw-linux-${bwVersion}.zip" -d .local/bin \
-    && rm -f "bw-linux-${bwVersion}.zip"
 
 ARG name=ubuntu24
 COPY --chown=${userName} ${name}/home ./
